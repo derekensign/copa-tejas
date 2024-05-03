@@ -14,10 +14,10 @@ import {
 function SimpleRow({ row }) {
   return  (
     <TableRow className="even:bg-gray-100 odd:bg-white">
-      <TableCell className="p-4 border-b border-gray-300" component="th" scope="row">
+      <TableCell className="p-4 border-b border-gray-300 " component="th" scope="row">
         <div className="flex items-center min-w-25">
           <img src={row.Logo} alt={`${row.TeamName} Logo`} className="w-8 mr-4" />
-          {row.TeamName}
+          <span className="mr-6 sm:mr-0">{row.TeamName}</span>
         </div>
       </TableCell>
       <TableCell className="p-4 border-b border-gray-300 text-center">{row.GamesPlayed}</TableCell>
@@ -54,7 +54,7 @@ export default function CopaTejasTable() {
       </a>
     </div>
     {isLoading && <div className="flex justify-center items-center h-screen"><CircularProgress /></div>}
-    <TableContainer component={Paper} className="overflow-hidden p-10 rounded-lg shadow-lg">
+    <TableContainer component={Paper} className="overflow-hidden p-0 sm:p-10 rounded-lg shadow-lg">
       <Table className="min-w-full divide-y divide-gray-300">
         <TableHead className="bg-gray-300 text-white">
           <TableRow>
