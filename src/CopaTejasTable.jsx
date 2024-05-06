@@ -47,28 +47,47 @@ export default function CopaTejasTable() {
 
   return (
     <div className="min-h-screen bg-white">
-    {isLoading && <div className="flex justify-center items-center h-screen"><CircularProgress /></div>}
-    <TableContainer component={Paper} className="overflow-hidden rounded-lg shadow-lg">
-      <Table className="min-w-full divide-y divide-gray-300">
-        <TableHead className="bg-gray-300 text-white">
-          <TableRow>
-            <TableCell className="p-4 text-left">Team</TableCell>
-            <TableCell className="p-4 text-center">Games</TableCell>
-            <TableCell className="p-4 text-center">Points</TableCell>
-            <TableCell className="p-4 text-center">PPG</TableCell>
-            <TableCell className="p-4 text-center">GF</TableCell>
-            <TableCell className="p-4 text-center">GA</TableCell>
-            <TableCell className="p-4 text-center">GD</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody className="bg-white divide-y divide-gray-300">
-          {rows.map((row, index) => (
-            <SimpleRow key={index} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    {isLoading ? <div className="flex justify-center items-center h-screen"><CircularProgress /></div>
+    : (
+    <div>
+      <TableContainer component={Paper} className="overflow-hidden rounded-lg shadow-lg">
+        <Table className="min-w-full divide-y divide-gray-300">
+          <TableHead className="bg-gray-300 text-white">
+            <TableRow>
+              <TableCell className="p-4 text-left">Team</TableCell>
+              <TableCell className="p-4 text-center">Games</TableCell>
+              <TableCell className="p-4 text-center">Points</TableCell>
+              <TableCell className="p-4 text-center">PPG</TableCell>
+              <TableCell className="p-4 text-center">GF</TableCell>
+              <TableCell className="p-4 text-center">GA</TableCell>
+              <TableCell className="p-4 text-center">GD</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody className="bg-white divide-y divide-gray-300">
+            {rows.map((row, index) => (
+              <SimpleRow key={index} row={row} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <div class="mt-4 px-4 py-2 bg-white shadow-md">
+        <p class="text-sm md:text-base text-gray-800">
+            To compensate for the variations in number of Copa Tejas matches played per team (due to league scheduling), the teams will be ranked by the average number of points per Copa Tejas match (PPG).
+        </p>
+        <h3 class="mt-4 mb-2 font-semibold text-lg md:text-xl text-gray-900">Tiebreakers:</h3>
+        <ol class="list-decimal pl-5 space-y-1 text-gray-800">
+            <li>Greater number of points earned in matches between the teams concerned</li>
+            <li>Greater goal difference in matches between the teams concerned</li>
+            <li>Greater number of goals scored in matches between the teams concerned</li>
+            <li>Reapply first three criteria if two or more teams are still tied</li>
+            <li>Greater goal difference in all cup matches</li>
+            <li>Greater number of goals scored in all cup matches</li>
+            <li>Smaller number of disciplinary points in all cup matches (yellow = 1 point, red = 2 points)</li>
+        </ol>
+      </div>
     </div>
+    )}
+  </div>
   );
 }
 
