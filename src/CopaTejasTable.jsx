@@ -47,14 +47,8 @@ export default function CopaTejasTable() {
 
   return (
     <div className="min-h-screen bg-white">
-    <div className="bg-gray-500 text-white p-4 flex items-center">
-      <a href="http://www.copatejas.com" className="flex items-center">
-        <img src="/CT-logo.png" alt="COPA TEJAS Logo" className="h-12 w-12 mr-2" />
-        <span className="text-xl font-bold">COPA TEJAS</span>
-      </a>
-    </div>
     {isLoading && <div className="flex justify-center items-center h-screen"><CircularProgress /></div>}
-    <TableContainer component={Paper} className="overflow-hidden p-0 sm:p-10 rounded-lg shadow-lg">
+    <TableContainer component={Paper} className="overflow-hidden rounded-lg shadow-lg">
       <Table className="min-w-full divide-y divide-gray-300">
         <TableHead className="bg-gray-300 text-white">
           <TableRow>
