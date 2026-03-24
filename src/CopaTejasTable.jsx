@@ -34,6 +34,12 @@ function StandingsRow({ row }) {
   );
 }
 
+const SHORT_NAMES = {
+  'Houston Dynamo': 'Houston',
+  'FC Dallas': 'Dallas',
+  'Austin FC': 'Austin',
+};
+
 function FixtureCard({ fixture }) {
   const gameDate = new Date(fixture.date);
   const isFinished = fixture.status === 'FT';
@@ -48,11 +54,15 @@ function FixtureCard({ fixture }) {
     minute: '2-digit',
   });
 
+  const homeShort = SHORT_NAMES[fixture.homeTeam] || fixture.homeTeam;
+  const awayShort = SHORT_NAMES[fixture.awayTeam] || fixture.awayTeam;
+
   return (
     <div className={`flex items-center p-2 sm:p-3 rounded-lg border ${isFinished ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'}`}>
       {/* Home team */}
       <div className="flex items-center flex-1 justify-end min-w-0">
-        <span className="text-xs sm:text-sm font-medium mr-2 sm:mr-3 text-right truncate">{fixture.homeTeam}</span>
+        <span className="text-xs font-medium mr-2 text-right sm:hidden">{homeShort}</span>
+        <span className="text-sm font-medium mr-3 text-right hidden sm:inline">{fixture.homeTeam}</span>
         <img src={fixture.homeLogo} alt={fixture.homeTeam} className="w-6 h-6 sm:w-7 sm:h-7 object-contain flex-shrink-0" />
       </div>
 
@@ -74,7 +84,8 @@ function FixtureCard({ fixture }) {
       {/* Away team */}
       <div className="flex items-center flex-1 min-w-0">
         <img src={fixture.awayLogo} alt={fixture.awayTeam} className="w-6 h-6 sm:w-7 sm:h-7 object-contain flex-shrink-0" />
-        <span className="text-xs sm:text-sm font-medium ml-2 sm:ml-3 truncate">{fixture.awayTeam}</span>
+        <span className="text-xs font-medium ml-2 sm:hidden">{awayShort}</span>
+        <span className="text-sm font-medium ml-3 hidden sm:inline">{fixture.awayTeam}</span>
       </div>
     </div>
   );
