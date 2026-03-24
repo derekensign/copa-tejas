@@ -52,12 +52,12 @@ function FixtureCard({ fixture }) {
     <div className={`flex items-center justify-between p-3 rounded-lg border ${isFinished ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'}`}>
       {/* Home team */}
       <div className="flex items-center flex-1 justify-end">
-        <span className="text-sm font-medium mr-2 text-right">{fixture.homeTeam}</span>
-        <img src={fixture.homeLogo} alt={fixture.homeTeam} className="w-7 h-7" />
+        <span className="text-sm font-medium mr-3 text-right">{fixture.homeTeam}</span>
+        <img src={fixture.homeLogo} alt={fixture.homeTeam} className="w-7 h-7 object-contain flex-shrink-0" />
       </div>
 
       {/* Score or date */}
-      <div className="mx-4 min-w-[80px] text-center">
+      <div className="mx-4 w-[120px] flex-shrink-0 text-center">
         {isFinished ? (
           <div>
             <span className="text-lg font-bold">{fixture.homeGoals} - {fixture.awayGoals}</span>
@@ -73,8 +73,8 @@ function FixtureCard({ fixture }) {
 
       {/* Away team */}
       <div className="flex items-center flex-1">
-        <img src={fixture.awayLogo} alt={fixture.awayTeam} className="w-7 h-7" />
-        <span className="text-sm font-medium ml-2">{fixture.awayTeam}</span>
+        <img src={fixture.awayLogo} alt={fixture.awayTeam} className="w-7 h-7 object-contain flex-shrink-0" />
+        <span className="text-sm font-medium ml-3">{fixture.awayTeam}</span>
       </div>
     </div>
   );
