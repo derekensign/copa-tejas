@@ -9,12 +9,16 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-function SimpleRow({ row }) {
-  return  (
+function StandingsRow({ row }) {
+  return (
     <TableRow className="even:bg-gray-100 odd:bg-white">
-      <TableCell className="p-4 border-b border-gray-300 " component="th" scope="row">
+      <TableCell className="p-4 border-b border-gray-300" component="th" scope="row">
         <div className="flex items-center min-w-25">
           <img src={row.Logo} alt={`${row.TeamName} Logo`} className="w-8 mr-4" />
           <span className="mr-6 sm:mr-0">{row.TeamName}</span>
@@ -30,16 +34,73 @@ function SimpleRow({ row }) {
   );
 }
 
+function FixtureCard({ fixture }) {
+  const gameDate = new Date(fixture.date);
+  const isFinished = fixture.status === 'FT';
+  const dateString = gameDate.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const timeString = gameDate.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  return (
+    <div className={`flex items-center justify-between p-3 rounded-lg border ${isFinished ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'}`}>
+      {/* Home team */}
+      <div className="flex items-center flex-1 justify-end">
+        <span className="text-sm font-medium mr-2 text-right">{fixture.homeTeam}</span>
+        <img src={fixture.homeLogo} alt={fixture.homeTeam} className="w-7 h-7" />
+      </div>
+
+      {/* Score or date */}
+      <div className="mx-4 min-w-[80px] text-center">
+        {isFinished ? (
+          <div>
+            <span className="text-lg font-bold">{fixture.homeGoals} - {fixture.awayGoals}</span>
+            <div className="text-xs text-gray-500">FT</div>
+          </div>
+        ) : (
+          <div>
+            <div className="text-xs font-medium text-gray-700">{dateString}</div>
+            <div className="text-xs text-gray-500">{timeString}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Away team */}
+      <div className="flex items-center flex-1">
+        <img src={fixture.awayLogo} alt={fixture.awayTeam} className="w-7 h-7" />
+        <span className="text-sm font-medium ml-2">{fixture.awayTeam}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function CopaTejasTable() {
   const [rows, setRows] = useState([]);
+  const [fixtures, setFixtures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeData = async () => {
       setIsLoading(true);
       const data = await fetchCopaTejasTable();
-      data.sort((a, b) => b.PointsPerGame - a.PointsPerGame);
-      setRows(data);
+
+      // Handle both old format (array) and new format ({ standings, fixtures })
+      if (Array.isArray(data)) {
+        data.sort((a, b) => b.PointsPerGame - a.PointsPerGame);
+        setRows(data);
+      } else {
+        const standings = data.standings || [];
+        standings.sort((a, b) => b.PointsPerGame - a.PointsPerGame);
+        setRows(standings);
+        setFixtures(data.fixtures || []);
+      }
+
       setIsLoading(false);
     };
     initializeData();
@@ -47,47 +108,78 @@ export default function CopaTejasTable() {
 
   return (
     <div className="min-h-screen bg-white">
-    {isLoading ? <div className="flex justify-center items-center h-screen"><CircularProgress /></div>
-    : (
-    <div>
-      <TableContainer component={Paper} className="overflow-hidden rounded-lg shadow-lg">
-        <Table className="min-w-full divide-y divide-gray-300">
-          <TableHead className="bg-gray-300 text-white">
-            <TableRow>
-              <TableCell className="p-4 text-left">Team</TableCell>
-              <TableCell className="p-4 text-center">Games</TableCell>
-              <TableCell className="p-4 text-center">Points</TableCell>
-              <TableCell className="p-4 text-center">PPG</TableCell>
-              <TableCell className="p-4 text-center">GF</TableCell>
-              <TableCell className="p-4 text-center">GA</TableCell>
-              <TableCell className="p-4 text-center">GD</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody className="bg-white divide-y divide-gray-300">
-            {rows.map((row, index) => (
-              <SimpleRow key={index} row={row} />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <div class="mt-4 px-4 py-2 bg-white shadow-md">
-        <p class="text-sm md:text-base text-gray-800">
-            To compensate for the variations in number of Copa Tejas matches played per team (due to league scheduling), the teams will be ranked by the average number of points per Copa Tejas match (PPG).
-        </p>
-        <h3 class="mt-4 mb-2 font-semibold text-lg md:text-xl text-gray-900">Tiebreakers:</h3>
-        <ol class="list-decimal pl-5 space-y-1 text-gray-800">
-            <li>Greater number of points earned in matches between the teams concerned</li>
-            <li>Greater goal difference in matches between the teams concerned</li>
-            <li>Greater number of goals scored in matches between the teams concerned</li>
-            <li>Reapply first three criteria if two or more teams are still tied</li>
-            <li>Greater goal difference in all cup matches</li>
-            <li>Greater number of goals scored in all cup matches</li>
-            <li>Smaller number of disciplinary points in all cup matches (yellow = 1 point, red = 2 points)</li>
-        </ol>
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <CircularProgress />
+        </div>
+      ) : (
+        <div>
+          {/* Standings Table */}
+          <TableContainer component={Paper} className="overflow-hidden rounded-lg shadow-lg">
+            <Table className="min-w-full divide-y divide-gray-300">
+              <TableHead className="bg-gray-300 text-white">
+                <TableRow>
+                  <TableCell className="p-4 text-left">Team</TableCell>
+                  <TableCell className="p-4 text-center">Games</TableCell>
+                  <TableCell className="p-4 text-center">Points</TableCell>
+                  <TableCell className="p-4 text-center">PPG</TableCell>
+                  <TableCell className="p-4 text-center">GF</TableCell>
+                  <TableCell className="p-4 text-center">GA</TableCell>
+                  <TableCell className="p-4 text-center">GD</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody className="bg-white divide-y divide-gray-300">
+                {rows.map((row, index) => (
+                  <StandingsRow key={index} row={row} />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Fixtures Schedule */}
+          {fixtures.length > 0 && (
+            <div className="mt-4 px-4 py-3 bg-white shadow-md rounded-lg">
+              <h3 className="mb-3 font-semibold text-lg text-gray-900">2026 Schedule & Results</h3>
+              <div className="flex flex-col gap-2">
+                {fixtures.map((fixture) => (
+                  <FixtureCard key={fixture.fixtureId} fixture={fixture} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Collapsible Rules & Tiebreakers */}
+          <div className="mt-4">
+            <Accordion defaultExpanded={false} sx={{ boxShadow: 'none', '&:before': { display: 'none' } }}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                className="bg-white"
+                sx={{ minHeight: 48, '& .MuiAccordionSummary-content': { margin: '8px 0' } }}
+              >
+                <span className="font-semibold text-lg text-gray-900">Rules & Tiebreakers</span>
+              </AccordionSummary>
+              <AccordionDetails className="bg-white">
+                <p className="text-sm md:text-base text-gray-800">
+                  To compensate for the variations in number of Copa Tejas matches played per team
+                  (due to league scheduling), the teams will be ranked by the average number of
+                  points per Copa Tejas match (PPG).
+                </p>
+                <h4 className="mt-4 mb-2 font-semibold text-base md:text-lg text-gray-900">Tiebreakers:</h4>
+                <ol className="list-decimal pl-5 space-y-1 text-gray-800">
+                  <li>Greater number of points earned in matches between the teams concerned</li>
+                  <li>Greater goal difference in matches between the teams concerned</li>
+                  <li>Greater number of goals scored in matches between the teams concerned</li>
+                  <li>Reapply first three criteria if two or more teams are still tied</li>
+                  <li>Greater goal difference in all cup matches</li>
+                  <li>Greater number of goals scored in all cup matches</li>
+                  <li>Smaller number of disciplinary points in all cup matches (yellow = 1 point, red = 2 points)</li>
+                </ol>
+              </AccordionDetails>
+            </Accordion>
+          </div>
+        </div>
+      )}
     </div>
-    )}
-  </div>
   );
 }
 
