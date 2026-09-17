@@ -50,12 +50,18 @@ export const handler = async (event) => {
     const fixturesEntry = items.find((item) => item.TeamName === fixturesKey);
     const fixtures = fixturesEntry?.FixturesJSON ? JSON.parse(fixturesEntry.FixturesJSON) : [];
 
+    // Official order when the updater stored a Rank; points per game otherwise
+    // (rows written before Rank existed), which is what the app always did.
     const standings = items
       .filter((item) => !String(item.TeamName).startsWith(FIXTURES_KEY_PREFIX) && belongsToCompetition(item))
       .map(({ Competition, DisplayName, ...item }) => ({
         ...item,
         TeamName: DisplayName || String(item.TeamName).replace(keyPrefix, ""),
-      }));
+      }))
+      .sort((a, b) => {
+        if (a.Rank != null && b.Rank != null) return Number(a.Rank) - Number(b.Rank);
+        return Number(b.PointsPerGame) - Number(a.PointsPerGame);
+      });
 
     if (!isMls && standings.length === 0 && fixtures.length === 0) {
       return jsonResponse(404, { message: `No data for competition '${competition}'` });

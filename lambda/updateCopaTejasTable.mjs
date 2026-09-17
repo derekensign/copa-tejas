@@ -64,7 +64,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @returns {Promise<object[]>} raw API-Football fixture objects
  */
 async function fetchTeamFixtures(teamId, season) {
-  const apiKey = process.env.RAPIDAPI_KEY;
+  // RAPIDAPI_FOOTBALL_KEY is the name the function used before September 2026.
+  const apiKey = process.env.RAPIDAPI_KEY || process.env.RAPIDAPI_FOOTBALL_KEY;
   if (!apiKey) throw new Error("RAPIDAPI_KEY is not set");
   const url = new URL(`https://${API_HOST}/v3/fixtures`);
   url.searchParams.set("season", season);
@@ -218,13 +219,16 @@ async function buildCompetition(competition, season) {
 async function writeCompetition(competition, standings, schedule) {
   const { DynamoDBClient, PutItemCommand } = await import("@aws-sdk/client-dynamodb");
   const client = new DynamoDBClient({ region: "us-east-1" });
-  for (const team of standings) {
+  // Rank is stored because a Scan returns rows in arbitrary order and the
+  // tiebreakers cannot be recomputed from the row alone.
+  for (const [index, team] of standings.entries()) {
     await client.send(new PutItemCommand({
       TableName: TABLE_NAME,
       Item: {
         TeamName: { S: competition.keyPrefix + team.name },
         DisplayName: { S: team.name },
         Competition: { S: competition.id },
+        Rank: { N: String(index + 1) },
         Logo: { S: team.logo },
         Points: { N: String(team.points) },
         GoalsFor: { N: String(team.goalsFor) },

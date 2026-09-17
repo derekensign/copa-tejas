@@ -115,15 +115,14 @@ export default function CopaTejasTable({ competition = 'mls' }) {
       const data = await fetchCopaTejasTable(competition);
 
       // Handle both old format (array) and new format ({ standings, fixtures })
-      if (Array.isArray(data)) {
-        data.sort((a, b) => b.PointsPerGame - a.PointsPerGame);
-        setRows(data);
-      } else {
-        const standings = data.standings || [];
-        standings.sort((a, b) => b.PointsPerGame - a.PointsPerGame);
-        setRows(standings);
-        setFixtures(data.fixtures || []);
-      }
+      const standings = Array.isArray(data) ? data : data.standings || [];
+      // The API ranks with the full tiebreaker list when it can (Rank); PPG alone
+      // cannot separate clubs level on points per game.
+      standings.sort((a, b) =>
+        a.Rank != null && b.Rank != null ? a.Rank - b.Rank : b.PointsPerGame - a.PointsPerGame
+      );
+      setRows(standings);
+      setFixtures(Array.isArray(data) ? [] : data.fixtures || []);
 
       setIsLoading(false);
     };
