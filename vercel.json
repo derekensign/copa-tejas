@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/mls", "destination": "/index.html" },
-    { "source": "/uslc", "destination": "/index.html" }
+    { "source": "/uslc", "destination": "/index.html" },
+    { "source": "/shield", "destination": "/index.html" }
   ]
 }
