@@ -34,10 +34,23 @@ function StandingsRow({ row }) {
   );
 }
 
+const API_URL = 'https://0n685go0ul.execute-api.us-east-1.amazonaws.com/fetchCopaTejasTable';
+
+/**
+ * One Copa Tejas competition per league. The API serves each by `?competition=`;
+ * the app picks one from the URL path (see index.js), so /uslc is its own page.
+ */
+export const COMPETITIONS = {
+  mls: { id: 'mls', label: 'MLS' },
+  uslc: { id: 'uslc', label: 'USLC' },
+};
+
 const SHORT_NAMES = {
   'Houston Dynamo': 'Houston',
   'FC Dallas': 'Dallas',
   'Austin FC': 'Austin',
+  'El Paso Locomotive': 'El Paso',
+  'San Antonio FC': 'San Antonio',
 };
 
 function FixtureCard({ fixture }) {
@@ -91,7 +104,7 @@ function FixtureCard({ fixture }) {
   );
 }
 
-export default function CopaTejasTable() {
+export default function CopaTejasTable({ competition = 'mls' }) {
   const [rows, setRows] = useState([]);
   const [fixtures, setFixtures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +112,7 @@ export default function CopaTejasTable() {
   useEffect(() => {
     const initializeData = async () => {
       setIsLoading(true);
-      const data = await fetchCopaTejasTable();
+      const data = await fetchCopaTejasTable(competition);
 
       // Handle both old format (array) and new format ({ standings, fixtures })
       if (Array.isArray(data)) {
@@ -115,7 +128,10 @@ export default function CopaTejasTable() {
       setIsLoading(false);
     };
     initializeData();
-  }, []);
+  }, [competition]);
+
+  // Season label for the schedule heading, taken from the data rather than hardcoded.
+  const seasonYear = fixtures.length ? new Date(fixtures[0].date).getFullYear() : new Date().getFullYear();
 
   return (
     <div className="min-h-screen bg-white">
@@ -150,7 +166,7 @@ export default function CopaTejasTable() {
           {/* Fixtures Schedule */}
           {fixtures.length > 0 && (
             <div className="mt-4 px-4 py-3 bg-white shadow-md rounded-lg">
-              <h3 className="mb-3 font-semibold text-lg text-gray-900">2026 Schedule & Results</h3>
+              <h3 className="mb-3 font-semibold text-lg text-gray-900">{seasonYear} Schedule & Results</h3>
               <div className="flex flex-col gap-2">
                 {fixtures.map((fixture) => (
                   <FixtureCard key={fixture.fixtureId} fixture={fixture} />
@@ -194,9 +210,9 @@ export default function CopaTejasTable() {
   );
 }
 
-async function fetchCopaTejasTable() {
+async function fetchCopaTejasTable(competition) {
   try {
-    const response = await axios.get('https://0n685go0ul.execute-api.us-east-1.amazonaws.com/fetchCopaTejasTable');
+    const response = await axios.get(API_URL, { params: { competition } });
     return response.data;
   } catch (error) {
     console.error('Failed to fetch data:', error);
